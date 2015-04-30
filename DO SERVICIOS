@@ -1,0 +1,138 @@
+use "$bases2014\base_unificada.dta"
+
+gen _mi_miss=0
+mi extract 0, clear
+
+
+* CORRECCIÓN
+replace c5=1 if p506==130
+
+gen GEO_dominio=dominio
+gen GEO_estrato=estrato
+gen GEO_DomEst=dominio*10+estrato
+
+gen GEO_area=1
+replace GEO_area=2 if (estrato>=6)
+replace GEO_area=1 if (GEO_dominio==8)
+
+gen GEO_DomArea=GEO_dominio*10+GEO_area
+
+label define quince	11 "11Costa Norte-urbano"   12 "12Costa Norte-rural" ///
+                    21 "21Costa Centro-urbano"  22 "22Costa Centro-rural" ///
+					31 "31Costa Sur-urbano"     32 "32Costa Sur-rural" ///
+					41 "41Sierra Norte-urbano"  42 "42Sierra Norte-rural" ///
+					51 "51Sierra Centro-urbano" 52 "52Sierra Centro-rural" ///
+					61 "61Sierra Sur-urbano"    62 "62Sierra Sur-rural" ///
+					71 "71Selva-urbano"         72 "72Selva-rural" ///
+					81 "81Lima Metropolitana-urbano", modify
+label values GEO_DomArea quince
+
+ * AGUA
+ tab s1, gen (s_agua)
+  
+ label define agua 1 "1Agua dentro de la vivienda" ///
+                   2 "2Agua fuera de la vivienda" ///
+				   3 "3Agua Pilón de uso público" ///
+				   4 "4Agua Cmanión - Cisterna" ///
+				   5 "5Agua Pozo" ///
+				   6 "6Agua Río acequia", modify
+  label values s1 agua
+  
+ * Servicio Higienico
+ 
+ tab s2, gen (s_serhig) 
+ *gen desague=SERHIG
+ 
+ *global desague   "s_dsg_redd s_dsg_redf s_dsg_sep s_dsg_cie s_dsg_rio s_dsg_otrno"
+
+ label define desa    1 "1Desague dentro de la vivienda" ///
+                      2 "2Desague fuera de la vivienda" ///
+				      3 "3Desague Letrina" ///
+				      4 "4Desague Pozo céptico" ///
+				      5 "5Desague Pozo ciego o negro" ///
+				      6 "6Desague Río acequia o canal", modify
+  label values s2 desa
+
+
+* Alumbrado
+ *global alumbrado "s_alum_elct s_alum_kro s_alum_ptrl s_alum_vl s_alum_otr s_alum_otrno"
+ 
+gen alumbrado=0
+replace alumbrado=1 if s_alum_elct==1
+replace alumbrado=2 if s_alum_kro==1
+replace alumbrado=3 if s_alum_ptrl==1
+replace alumbrado=4 if s_alum_vl==1
+replace alumbrado=5 if s_alum_otr==1 & s_alum_otrno==1
+replace alumbrado=6 if s_alum_otrno==1 & s_alum_otr==0
+ 
+ 
+rename s_alum_elct s_alum1
+rename s_alum_kro  s_alum2
+rename s_alum_ptrl s_alum3
+rename s_alum_vl   s_alum4
+gen s_alum5=(s_alum_otr==1 & s_alum_otrno==1)
+gen s_alum6=(s_alum_otrno==1 & s_alum_otr==0)
+
+label define alumbra 1 "1Alumbrado Electricidad" ///
+                       2 "2Alumbrado Kerosene" ///
+				       3 "3Alumbrado Petroleo" ///
+				       4 "4Alumbrado Vela" ///
+				       5 "5Alumbrado Otro" ///
+				       6 "6Alumbrado Notiene", modify
+label values alumbrado alumbra
+ 
+   
+ * Combustible
+ 
+ tab v7_i,gen(s_combus)
+ 
+   label define combust 1 "1Combust Electricidad" ///
+                        2 "2Combust Gas" ///
+				        3 "3Combust Kerosene" ///
+				        4 "4Combust Carbón" ///
+				        5 "5Combust Leña" ///
+				        7 "7Combust Otro" ///
+					    8 "8No cocina", modify
+  label values v7_i combust
+ 
+ * Alguien en el hogar con seguro (Essalud, FFAA o privado)
+gen hogar_seguro=(d6_a==1 | d6_b==1 | d6_c==1)
+bysort a_o conglome vivienda hogar : egen d_hogar_seguro=max(hogar_seguro)
+
+* JH EN AGRICULTURA
+gen jh_agri=(c5==1 & d3==1)
+$sorted egen c_jh_agri=max(jh_agri)
+
+* AÑOS EDUCATIVOS DEL JH
+*gen jh_anoedu=anoeduc if d3==1
+*$sorted egen d_jh_anoedu = max(jh_anoedu)
+ 
+ 
+  *==================
+ *      TABLAS
+ *==================
+ 
+ *Agua 
+ 
+  tab s1 GEO_DomArea 
+  tab alumbrado GEO_DomArea 
+  tab s2 GEO_DomArea 
+  tab v7_i GEO_DomArea 
+
+  *===============
+  *   GRÁFICOS
+  *===============
+  
+  *Agua   
+recode GEO_DomArea (11=1)  (12=2)(21=3)  (22=4)(31=5)  (32=6)  (41=7)  (42=8) (51=9)  (52=10)  (61=11) (62=12) (71=13) (72=14)(81=15)
+
+keep a_o conglome vivienda hogar ubigeo pobreza decil_gasto gpc_men_pc GEO_DomArea s_agua1 s_agua2 s_agua3 s_agua4 s_agua5 s_agua6 s_serhig1 s_serhig2 s_serhig3 s_serhig4 s_serhig5 s_serhig6 s_serhig7 s_alum1 s_alum2 s_alum3 s_alum4 s_alum5 s_alum6 s_combus1 s_combus2 s_combus3 s_combus4 s_combus5 s_combus6 s_combus7 s1 s2 alumbrado v7_i v_malpiso v_maltecho v_usa_comb_solido v_hacina p113a p103a d_max_anoedu c_jh_sec_incom d_hogar_seguro c_indig_jh d_jh_anoedu jh_agri b_bien b_biendur b_bienel b_bien_per
+
+foreach y of numlist 1(1)15{
+preserve
+keep if GEO_DomArea==`y'
+saveold "G:\PCA_MIDIS\SERVICIOS\base_servicios_`y'",replace
+restore
+}
+
+saveold "G:\PCA_MIDIS\SERVICIOS\base_servicios_tot",replace
