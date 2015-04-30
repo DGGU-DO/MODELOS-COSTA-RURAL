@@ -1,0 +1,102 @@
+*COSTA SUR RURAL
+*ROC 0.74
+
+CD 'G:\PCA_MIDIS\SERVICIOS'. 
+
+GET
+  STATA FILE='G:\PCA_MIDIS\SERVICIOS\base_servicios_6.dta'.
+DATASET NAME Conjunto_de_datos7 WINDOW=FRONT.
+
+if(p103a=1)vTecho_1Concreto=1.
+if(p103a=2)vTecho_2Madera=1.
+if(p103a=3)vTecho_3Tejas=1.
+if(p103a=4)vTecho_4Calamina=1.
+if(p103a=5)vTecho_5Barro=1.
+if(p103a=6)vTecho_6Estera=1.
+if(p103a=7)vTecho_7PajaPalmera=1.
+if(p103a=8)vTecho_8Otro=1.
+recode vTecho_1Concreto to vTecho_8Otro (sysmis=0).
+
+if(P113a=1)vCocina_1Electricidad=1.
+if(P113a=2)vCocina_1GasGLP=1.
+if(P113a=3)vCocina_1GasNatural=1.
+if(P113a=4)vCocina_1Kerosene=1.
+if(P113a=5)vCocina_1Carbon=1.
+if(P113a=6)vCocina_1Lenia=1.
+if(P113a=7)vCocina_1Otro=1.
+if(P113a=0)vCocina_1NoCocina=1.
+recode vCocina_1Electricidad to vCocina_1NoCocina (sysmis=0).
+execute.
+
+DESCRIPTIVES VARIABLES=
+s_agua1
+s_agua2 
+s_agua3 
+s_agua4 
+s_agua5 
+s_agua6
+s_serhig1 
+s_serhig2 
+s_serhig3 
+s_serhig4 
+s_serhig5 
+s_serhig6 
+s_alum1 
+s_alum2 
+s_alum3 
+s_alum4 
+s_alum5 
+s_alum6
+s_combus1 
+s_combus2 
+s_combus3 
+s_combus4 
+s_combus5 
+s_combus6
+s_combus7
+v_malpiso
+v_maltecho
+v_usa_comb_solido
+v_hacina
+vCocina_1GasGLP
+vTecho_1Concreto
+/SAVE
+  /STATISTICS=MEAN STDDEV MIN MAX.
+
+FACTOR 
+/VARIABLES 
+Zv_hacina
+Zv_malpiso
+Zv_usa_comb_solido
+Zv_maltecho
+Zs_agua1
+Zs_alum1
+  /MISSING LISTWISE 
+  /ANALYSIS
+Zv_hacina
+Zv_malpiso
+Zv_usa_comb_solido
+Zv_maltecho
+Zs_agua1
+Zs_alum1
+  /PRINT INITIAL DET KMO EXTRACTION ROTATION
+  /CRITERIA MINEIGEN(1) ITERATE(25)
+  /EXTRACTION PC
+  /CRITERIA ITERATE(25)
+  /ROTATION VARIMAX
+  /SAVE REG(ALL)
+  /METHOD=CORRELATION.
+  
+  RECODE pobreza (3=0) (2=1) (1=1) INTO pobre. 
+
+ROC
+  FAC1_1  BY  pobre(1)
+  /PLOT = CURVE(REFERENCE)
+  /CRITERIA = CUTOFF(INCLUDE) TESTPOS(LARGE) DISTRIBUTION(FREE) CI(95)
+  /MISSING = EXCLUDE .
+
+ROC
+  FAC2_1  BY  pobre(1)
+  /PLOT = CURVE(REFERENCE)
+  /CRITERIA = CUTOFF(INCLUDE) TESTPOS(LARGE) DISTRIBUTION(FREE) CI(95)
+  /MISSING = EXCLUDE .
