@@ -1,12 +1,10 @@
 
 *COSTA NORTE RURAL
-*ROC 0.77
+*ROC 0.78
 
 CD 'G:\PCA_MIDIS\SERVICIOS'. 
 
-GET
-  STATA FILE='G:\PCA_MIDIS\SERVICIOS\base_servicios_2.dta'.
-DATASET NAME Conjunto_de_datos7 WINDOW=FRONT.
+GET STATA FILE='G:\PCA_MIDIS\SERVICIOS\base_servicios_2.dta'.
 
 if(p103a=1)vTecho_1Concreto=1.
 if(p103a=2)vTecho_2Madera=1.
@@ -28,9 +26,6 @@ if(P113a=7)vCocina_1Otro=1.
 if(P113a=0)vCocina_1NoCocina=1.
 recode vCocina_1Electricidad to vCocina_1NoCocina (sysmis=0).
 execute.
-
-COMPUTE s_serhig4_6 =s_serhig4 +s_serhig6.
-EXECUTE.
 
 DESCRIPTIVES VARIABLES=
 s_agua1
@@ -72,20 +67,21 @@ vCocina_1GasGLP
 vTecho_1Concreto
 /SAVE
   /STATISTICS=MEAN STDDEV MIN MAX.
+
 FACTOR 
 /VARIABLES  
 Zv_hacina
 Zv_malpiso
 Zv_usa_comb_solido
 Zv_maltecho
-Zs_serhig1
+Zs_combus2
   /MISSING LISTWISE 
   /ANALYSIS  
 Zv_hacina
 Zv_malpiso
 Zv_usa_comb_solido
-Zv_maltecho
-Zs_serhig1
+Zv_maltecho 
+Zs_combus2
   /PRINT INITIAL DET KMO EXTRACTION ROTATION
   /CRITERIA MINEIGEN(1) ITERATE(25)
   /EXTRACTION PC
@@ -93,8 +89,8 @@ Zs_serhig1
   /ROTATION VARIMAX
   /SAVE REG(ALL)
   /METHOD=CORRELATION.
-  
-  RECODE pobreza (3=0) (2=1) (1=1) INTO pobre. 
+
+RECODE pobreza (3=0) (2=1) (1=1) INTO pobre. 
 
 ROC
   FAC1_1  BY  pobre(1)
