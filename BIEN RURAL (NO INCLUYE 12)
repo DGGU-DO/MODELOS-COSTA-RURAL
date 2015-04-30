@@ -1,0 +1,127 @@
+*** (1)  DIRECTORIO DE UBICACION DE ARCHIVOS dta.
+           CD 'G:\DDGU 2015\5. Actividades\1. Algoritmo PCA\5. Bienes'. 
+
+*** (2)  ABRIR BASE DE DATOS DE VIVIENDA. 
+***       CON DATOS YA IMPUTADOS. 
+***       EN FORMATO STATA "dta".
+          GET FILE='ENAHO_TOTA1L.SAV' .
+
+VARIABLE LABELS
+b1                'Equipo de sonido'    		
+b2             	  'TV a color'    	
+b3                 'DVD'    	
+b4                 'Licuadora'    	
+b5                 'Refrigeradora'    		
+b6                 'Cocina a Gas'    	
+b7                 'Telefono Fijo'    			
+b8                 'Plancha Electrica'    			
+b9                 'Lavadora'    		
+b10                'Computadoras'    			
+b11                'Horno Microondas'    			
+b12          	   'Internet'    		
+b13                'Cable'    		
+b14               'Celular'    	
+b15               'Ninguna'    
+b_bien           'N ° de Bienes'    
+b_biendur       'N° de Bienes Durables'    
+b_bienel           'N ° de Bienes Electrodomésticos'    
+b_bientelec       'N° de Bienes Telecom'   
+b_bien_per       'N° de Bienes per Cápita'.
+
+*Zs_ning 
+Zs_3serv
+Zd_ratio_menos6
+Zd_ano_educ_mujer
+
+
+**************************************************************************************
+*               Bienes en el tiempo por decil URBANO- TERMINAN EN -1
+************************************************************************************** *****
+* 11 12 21 22 31 32 41 42 51 52 61 62 71 72
+*>> graficado el b1.
+
+USE ALL.
+COMPUTE filter_$=(GEO_DomArea =22).
+VARIABLE LABELS filter_$ 'GEO_DomArea = Rural  (FILTER)'.
+VALUE LABELS filter_$ 0 'Not Selected' 1 'Selected'.
+FORMATS filter_$ (f1.0).
+FILTER BY filter_$.
+EXECUTE.
+
+*Análisis descriptivo. 
+DESCRIPTIVES VARIABLES=
+b1
+b2
+b3
+b4
+b5
+b6
+b7
+b8
+b5
+b9
+b10
+b11
+b12
+b13
+b14
+b_bien
+b_biendur
+b_bienel
+b_bientelec
+b_bien_per
+/SAVE
+  /STATISTICS=MEAN STDDEV MIN MAX.
+
+*Se le puede agreagar Zv_maltecho pero no aporta mucho.
+FACTOR
+  /VARIABLES 
+Zb_bien 
+Zb_biendur
+Zb_bienel
+Zb_bien_per
+  /MISSING LISTWISE 
+  /ANALYSIS 
+Zb_bien 
+Zb_biendur
+Zb_bienel
+Zb_bien_per
+  /PRINT INITIAL DET KMO EXTRACTION ROTATION
+   /PRINT INITIAL EXTRACTION FSCORE
+  /CRITERIA MINEIGEN(1) ITERATE(25)
+  /EXTRACTION PC
+  /CRITERIA ITERATE(25)
+  /ROTATION VARIMAX
+  /SAVE REG(ALL)
+  /METHOD=CORRELATION.
+
+*GRAPH
+  /HISTOGRAM=FAC1_1.
+
+*NONPAR CORR
+  /VARIABLES=FAC1_1 gpc_men_pc
+  /PRINT=SPEARMAN TWOTAIL NOSIG
+  /MISSING=PAIRWISE.
+
+*CORRELATIONS
+  /VARIABLES=FAC1_1 gpc_men_pc
+  /PRINT=TWOTAIL NOSIG
+  /MISSING=PAIRWISE.
+
+  *GRAPH
+  /SCATTERPLOT(BIVAR)=gt2 WITH FAC1_1 BY pobreza
+  /MISSING=LISTWISE.
+
+RECODE pobreza (3=0) (2=1) (1=1) INTO pobre. 
+
+ROC
+  FAC1_1  BY  pobre(0)
+  /PLOT = CURVE(REFERENCE)
+  /CRITERIA = CUTOFF(INCLUDE) TESTPOS(LARGE) DISTRIBUTION(FREE) CI(95)
+  /MISSING = EXCLUDE .
+
+*ROC
+  FAC2_1  BY  pobre(1)
+  /PLOT = CURVE(REFERENCE)
+  /CRITERIA = CUTOFF(INCLUDE) TESTPOS(LARGE) DISTRIBUTION(FREE) CI(95)
+  /MISSING = EXCLUDE .
