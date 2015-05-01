@@ -77,20 +77,12 @@ Zv_malpiso
 Zv_maltecho
 Zv_usa_comb_solido
 Zv_hacina
-ZvCocina_1GasGLP
-ZvTecho_1Concreto
-Zs_serhig4 
-Zs_serhig6
   /MISSING LISTWISE 
   /ANALYSIS
 Zv_malpiso
 Zv_maltecho
 Zv_usa_comb_solido
 Zv_hacina
-ZvCocina_1GasGLP
-ZvTecho_1Concreto
-Zs_serhig4 
-Zs_serhig6
   /PRINT INITIAL DET KMO EXTRACTION ROTATION
   /CRITERIA MINEIGEN(1) ITERATE(25)
   /EXTRACTION PC
