@@ -90,7 +90,6 @@ Zb_bien_per
 Zd_max_anoedu
 Zb_biendur
 Zb_bienel 
-Zs_alum5
   /MISSING LISTWISE 
   /ANALYSIS  
 Zv_hacina
@@ -102,7 +101,6 @@ Zb_bien_per
 Zd_max_anoedu
 Zb_biendur 
 Zb_bienel 
-Zs_alum5
   /PRINT INITIAL DET KMO EXTRACTION ROTATION
   /CRITERIA MINEIGEN(1) ITERATE(25)
   /EXTRACTION PC
